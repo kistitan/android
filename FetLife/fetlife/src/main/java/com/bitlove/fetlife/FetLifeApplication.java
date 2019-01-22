@@ -117,7 +117,7 @@ public class FetLifeApplication extends MultiDexApplication {
     //Service objects
     //****
 
-    private static final String MIXPANEL_TOKEN = "13b2ffb2b1535bf3c285a09a76dae4b5";
+    private static final String MIXPANEL_TOKEN = "";
     private MixpanelAPI mixpanel;
 
     private FetLifeService fetLifeService;
