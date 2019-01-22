@@ -38,6 +38,7 @@ import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFact
 import com.facebook.imagepipeline.cache.CacheKeyFactory;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.facebook.imagepipeline.request.ImageRequest;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.onesignal.OneSignal;
 
 import org.greenrobot.eventbus.EventBus;
@@ -116,6 +117,9 @@ public class FetLifeApplication extends MultiDexApplication {
     //Service objects
     //****
 
+    private static final String MIXPANEL_TOKEN = "";
+    private MixpanelAPI mixpanel;
+
     private FetLifeService fetLifeService;
     private NotificationParser notificationParser;
     private EventBus eventBus;
@@ -150,8 +154,14 @@ public class FetLifeApplication extends MultiDexApplication {
             versionText = getString(R.string.text_unknown);
         }
 
+
         //Init crash logging
         Fabric.with(this, new Crashlytics());
+
+        //Init stats
+        mixpanel =
+                MixpanelAPI.getInstance(this, MIXPANEL_TOKEN);
+
 
         try {
             customTabsSupported = CustomTabsClient.bindCustomTabsService(this, "com.android.chrome", new FetLifeCustomTabsServiceConnection());
@@ -207,6 +217,10 @@ public class FetLifeApplication extends MultiDexApplication {
 
     public ActionCable getActionCable() {
         return actionCable;
+    }
+
+    public MixpanelAPI getMixpanel() {
+        return mixpanel;
     }
 
     private void createDefaultNotificationChanel() {
@@ -320,7 +334,6 @@ public class FetLifeApplication extends MultiDexApplication {
             CustomTabLauncherActivity.Companion.closeCustomTab(this);
         }
     }
-
 
     static class FrescoTokenLessCacheKey implements CacheKey {
 
@@ -514,6 +527,7 @@ public class FetLifeApplication extends MultiDexApplication {
                     userSessionManager.onUserLogOut();
                 }
                 actionCable.disconnect();
+                mixpanel.flush();
             } else if(isWaitingForResult) {
                 //If we are waiting for an external task to be finished, start a delayed log out
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {

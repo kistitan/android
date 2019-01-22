@@ -17,6 +17,7 @@ import com.bitlove.fetlife.util.SecurityUtil;
 import com.bitlove.fetlife.util.StringUtil;
 import com.bitlove.fetlife.view.screen.standalone.SettingsActivity;
 import com.crashlytics.android.Crashlytics;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.onesignal.OneSignal;
 import com.raizlabs.android.dbflow.config.FlowManager;
 
@@ -323,6 +324,10 @@ public class UserSessionManager {
             Crashlytics.logException(new Exception("User record could not be found"));
         } else {
             Crashlytics.log("User notification:" + user.getNotificationToken());
+
+            MixpanelAPI mixpanel = fetLifeApplication.getMixpanel();
+            mixpanel.identify(user.getId());
+            mixpanel.getPeople().identify(user.getId());
         }
         return user;
     }
